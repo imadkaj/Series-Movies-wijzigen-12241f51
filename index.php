@@ -120,9 +120,6 @@ function echoMovies()
 </table>
 
 <br>
-
-<a href="series_create.php"><button>Add serie</button></a>
-
 <br>
 
 <table>
@@ -135,7 +132,3 @@ function echoMovies()
 <?php echoMovies($stmt2); ?>
 </tr>
 </table>
-
-<br>
-
-<a href="films_create.php"><button>Add film</button></a>
