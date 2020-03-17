@@ -1,91 +1,52 @@
 <?php
-
-$id = $_GET['id'];
-
-$localhost = 'localhost';
-$db = 'netland';
+$host = '127.0.0.1';
+$db   = 'netland';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
 
-$dsn = "mysql:host=$localhost;dbname=$db;charset=$charset";
-
-try 
-{
-    $pdo = new PDO($dsn, $user, $pass);
-} 
-catch (\PDOException $e) 
-{
-    echo 'error connecting to database: ' . $e->getMessage();
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+try {
+     $pdo = new PDO($dsn, $user, $pass, $options);
+     
+} catch (\PDOException $e) {
+     throw new \PDOException($e->getMessage("no connection"), (int)$e->getCode());
 }
-
-$stmt = $pdo->prepare('SELECT * FROM movies WHERE volgnummer = :id');
-$stmt->bindParam(':id', $id);
-$stmt->execute();
-
-$film = $stmt->fetch(PDO::FETCH_OBJ);
-
-function getTitle()
-{
-    global $film;
-    return $film->title;
-}
-
-function getDuration()
-{
-    global $film;
-    return $film->duur;
-}
-
-function getDatum()
-{
-    global $film;
-    return $film->datum;
-}
-
-function getCountry()
-{
-    global $film;
-    return $film->land;
-}
-
-function getDescription()
-{
-    global $film;
-    return $film->omschrijving;
-}
-
-function getTrailerID()
-{
-    global $film;
-    return $film->trailer_id;
-}
-
+$moviedata = $pdo->query('SELECT * from movies where id ='. $_GET['link']);
 ?>
+<html lang="nl">
+<head>  
+</head>
+<body>
+    <table>
+        <?php
+        foreach ($moviedata as $row){
+            ?>
+        <tr>
+            <td><h1><?php echo $row['title']; ?></h1></td>
+        </tr>
+        <tr>
+            <td><?php echo "land van herkomst: " .  $row['land_van_uitkomst']; ?></td>
+        </tr>
+        <tr>
+            <td><?php echo "datum van uitkomst: " .  $row['datum_van_uitkomst']; ?></td>
+        </tr>
+        <tr>
+            <td><?php echo "description: " . $row['description']; ?></td>
+        </tr>
+        <tr>
+            <td><?php echo "trailer: " . $row['youtube_trailer_id']; ?></td>
+        </tr>
+        <?php
+        }
+        ?>
+    </table>
+     
+</body>
 
-<a href="index.php">terug</a>
-
-<h2><?php echo getTitle(); echo ' - ' . getDuration();?></h2>
-
-<table>
-    <tr>
-        <th>Datum van uitkomst</th>
-        <td><?php echo getDatum(); ?></td>
-    </tr>
-    <tr>
-        <th>Land</th>
-        <td><?php echo getCountry(); ?></td>
-    </tr>
-</table>
-
-<p><?php echo getDescription(); ?></p>
-
-<iframe width="420" height="345" src=<?php echo "https://www.youtube.com/embed/" . getTrailerID();?>>
-</iframe>
-
-<br></br>
-
-<form action="films_edit.php" method="get">
-<input type="submit" name="submit" value="wijzig">
-<input type="hidden" name="id" value="<?php echo $id;?>">
-</form>
+</html>
